@@ -1,6 +1,8 @@
 # Gradleless
 
-**Build signed Android APKs without Gradle, without Android Studio, without network.**
+> **Your Website. Your APK. No Gradle. No Android Studio.**
+
+**Turn a website into an Android APK — or build a small native app — with one shell script and zero build-time network access.**
 
 Gradleless is a small, dependency-free CLI that turns a simple project folder into a
 signed, zipaligned APK using only the Android SDK build-tools (`aapt2`, `d8`,
