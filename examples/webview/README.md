@@ -6,7 +6,7 @@ Wraps a website as an installable APK — the seed of the **web2apk** idea
 ## Build it
 
 ```bash
-../../buildapk.sh --src . --out MySite.apk \
+../../gradleless.sh --src . --out MySite.apk \
   --name "My Site" --package com.example.mysite
 ```
 

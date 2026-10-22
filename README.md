@@ -1,8 +1,8 @@
-# BuildAPK
+# Gradleless
 
 **Build signed Android APKs without Gradle, without Android Studio, without network.**
 
-BuildAPK is a small, dependency-free CLI that turns a simple project folder into a
+Gradleless is a small, dependency-free CLI that turns a simple project folder into a
 signed, zipaligned APK using only the Android SDK build-tools (`aapt2`, `d8`,
 `zipalign`, `apksigner`) and a JDK. It exists because Gradle is slow, heavy, and
 overkill for small apps — and because you should be able to build an APK on any
@@ -29,8 +29,8 @@ The script checks all of these up front and tells you exactly what's missing.
 
 ```bash
 # 1. Build the bundled starter app
-./buildapk.sh --src template --out hello.apk \
-  --name "Hello BuildAPK" --package com.example.hello
+./gradleless.sh --src template --out hello.apk \
+  --name "Hello Gradleless" --package com.example.hello
 
 # 2. Verify it
 ~/Android/sdk/build-tools/34.0.0/aapt dump badging hello.apk | grep -E "^(package|launchable-activity):"
@@ -39,21 +39,21 @@ The script checks all of these up front and tells you exactly what's missing.
 adb install hello.apk
 ```
 
-On first run, BuildAPK creates a debug keystore at `~/.buildapk/debug.keystore`
+On first run, Gradleless creates a debug keystore at `~/.gradleless/debug.keystore`
 and reuses it afterwards. Bring your own release key with `--keystore`.
 
 ## CLI reference
 
 ```
-buildapk.sh --src <project-dir> --out <app.apk> [options]
+gradleless.sh --src <project-dir> --out <app.apk> [options]
 
-  --name NAME          App label                      (default: BuildAPK)
-  --package PKG        Application id                 (default: com.example.buildapk)
+  --name NAME          App label                      (default: Gradleless)
+  --package PKG        Application id                 (default: com.example.gradleless)
   --version-code N     Integer version code           (default: 1)
   --version-name X     Version name                   (default: 1.0)
   --min-sdk N          minSdkVersion                  (default: 24)
   --target-sdk N       targetSdkVersion               (default: 34)
-  --keystore PATH      Signing keystore               (default: ~/.buildapk/debug.keystore)
+  --keystore PATH      Signing keystore               (default: ~/.gradleless/debug.keystore)
   --ks-pass PASS       Keystore password              (default: android)
   --key-pass PASS      Key password                   (default: android)
   --key-alias ALIAS    Key alias                      (default: androiddebugkey)

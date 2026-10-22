@@ -1,8 +1,1 @@
-# Build artifacts
 *.apk
-*.aab
-# Temp dirs
-tmp/
-.tmp/
-# OS
-.DS_Store

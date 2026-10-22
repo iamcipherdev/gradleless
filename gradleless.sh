@@ -1,16 +1,16 @@
 #!/bin/bash
 # =============================================================================
-# buildapk — Gradle-free Android APK builder
+# gradleless — Gradle-free Android APK builder
 # Builds a signed APK from a simple project dir using only aapt2 + d8.
 # No Gradle. No Android Studio. No network.
 #
 # Usage:
-#   buildapk.sh --src <project-dir> --out <app.apk> [options]
+#   gradleless.sh --src <project-dir> --out <app.apk> [options]
 #
 # Options:
-#   --name NAME            App label shown on device        (default: BuildAPK)
+#   --name NAME            App label shown on device        (default: Gradleless)
 #   --package PKG          Application id, e.g. com.example.app
-#                                                    (default: com.example.buildapk)
+#                                                    (default: com.example.gradleless)
 #   --version-code N       Integer version code             (default: 1)
 #   --version-name X       Version name string              (default: 1.0)
 #   --min-sdk N            minSdkVersion                    (default: 24)
@@ -38,9 +38,9 @@ set -e
 
 # ---------- defaults ----------
 SRC=""; OUT=""
-APP_NAME="BuildAPK"; PACKAGE="com.example.buildapk"
+APP_NAME="Gradleless"; PACKAGE="com.example.gradleless"
 VCODE=1; VNAME="1.0"; MINSDK=24; TARGETSDK=34
-KEYSTORE="$HOME/.buildapk/debug.keystore"
+KEYSTORE="$HOME/.gradleless/debug.keystore"
 KS_PASS="android"; KEY_PASS="android"; KEY_ALIAS="androiddebugkey"
 KEEP_TMP=0
 
@@ -61,11 +61,11 @@ while [ $# -gt 0 ]; do
     --key-alias)    KEY_ALIAS="$2"; shift 2;;
     --keep-tmp)     KEEP_TMP=1; shift;;
     -h|--help)      sed -n '2,40p' "$0"; exit 0;;
-    *) echo "buildapk: unknown argument: $1" >&2; echo "try: buildapk.sh --help" >&2; exit 1;;
+    *) echo "gradleless: unknown argument: $1" >&2; echo "try: gradleless.sh --help" >&2; exit 1;;
   esac
 done
 
-fail() { echo "buildapk: ERROR: $1" >&2; exit 1; }
+fail() { echo "gradleless: ERROR: $1" >&2; exit 1; }
 
 [ -n "$SRC" ] || fail "missing --src <project-dir>"
 [ -n "$OUT" ] || fail "missing --out <app.apk>"
@@ -92,12 +92,12 @@ done
 [ -f "$ANDROID_JAR" ] || fail "android.jar not found: $ANDROID_JAR"
 
 # ---------- staging ----------
-B="$(mktemp -d /tmp/buildapk_XXXXXX)"
+B="$(mktemp -d /tmp/gradleless_XXXXXX)"
 mkdir -p "$B/gen" "$B/classes" "$B/dex"
 if [ "$KEEP_TMP" -eq 0 ]; then
   trap 'rm -rf "$B"' EXIT
 else
-  echo "buildapk: keeping temp dir: $B"
+  echo "gradleless: keeping temp dir: $B"
 fi
 
 # Copy project so placeholder substitution never touches the original
@@ -111,11 +111,11 @@ if grep -rq '{{PACKAGE}}\|{{APP_NAME}}' "$B/stage" 2>/dev/null; then
   grep -rl '{{PACKAGE}}\|{{APP_NAME}}' "$B/stage" | while IFS= read -r f; do
     sed -i "s/{{PACKAGE}}/$PKG_ESC/g; s/{{APP_NAME}}/$NAME_ESC/g" "$f"
   done
-  echo "buildapk: substituted placeholders (package=$PACKAGE, name=$APP_NAME)"
+  echo "gradleless: substituted placeholders (package=$PACKAGE, name=$APP_NAME)"
 fi
 S="$B/stage"
 
-echo "buildapk: building $APP_NAME ($PACKAGE) v$VNAME ($VCODE) -> $OUT"
+echo "gradleless: building $APP_NAME ($PACKAGE) v$VNAME ($VCODE) -> $OUT"
 
 # ---------- 1. aapt2 compile + link ----------
 echo "== [1/5] aapt2 compile =="
@@ -136,7 +136,7 @@ echo "== [3/5] javac =="
 CP="$ANDROID_JAR"
 if ls "$S"/libs/*.jar >/dev/null 2>&1; then
   for j in "$S"/libs/*.jar; do CP="$CP:$j"; done
-  echo "buildapk: extra jars on classpath: $(ls "$S"/libs/*.jar | wc -l)"
+  echo "gradleless: extra jars on classpath: $(ls "$S"/libs/*.jar | wc -l)"
 fi
 JAVA_FILES="$(find "$B/gen" "$S/java" -name '*.java' 2>/dev/null)"
 [ -n "$JAVA_FILES" ] || fail "no .java sources found (need java/ dir or generated R.java)"
@@ -159,16 +159,16 @@ if [ -d "$S/jniLibs" ] && [ -n "$(ls -A "$S/jniLibs" 2>/dev/null)" ]; then
   mkdir -p "$B/libstage/lib"
   cp -r "$S"/jniLibs/. "$B/libstage/lib/"
   (cd "$B/libstage" && zip -q -0 -r "$B/base.apk" lib)
-  echo "buildapk: packaged native libs from jniLibs/"
+  echo "gradleless: packaged native libs from jniLibs/"
 fi
 "$ANDROID_BT/zipalign" -f -p 4 "$B/base.apk" "$B/aligned.apk"
 
 if [ ! -f "$KEYSTORE" ]; then
-  echo "buildapk: creating debug keystore at $KEYSTORE"
+  echo "gradleless: creating debug keystore at $KEYSTORE"
   mkdir -p "$(dirname "$KEYSTORE")"
   keytool -genkeypair -keystore "$KEYSTORE" -alias "$KEY_ALIAS" -keyalg RSA \
     -keysize 2048 -validity 10950 -storepass "$KS_PASS" -keypass "$KEY_PASS" \
-    -dname "CN=buildapk-debug, OU=buildapk, O=buildapk, C=US" 2>/dev/null \
+    -dname "CN=gradleless-debug, OU=gradleless, O=gradleless, C=US" 2>/dev/null \
     || fail "keytool failed to create keystore"
 fi
 mkdir -p "$(dirname "$OUT")"
@@ -181,8 +181,8 @@ mkdir -p "$(dirname "$OUT")"
 echo "== verify =="
 "$ANDROID_BT/apksigner" verify "$OUT" \
   || fail "apksigner verify FAILED for $OUT"
-echo "buildapk: signature OK"
+echo "gradleless: signature OK"
 "$ANDROID_BT/aapt" dump badging "$OUT" | grep -E "^(package|launchable-activity):" \
   || fail "aapt dump badging found no package/launchable-activity"
 ls -la "$OUT"
-echo "BUILDAPK_OK: $OUT"
+echo "GRADLELESS_OK: $OUT"
