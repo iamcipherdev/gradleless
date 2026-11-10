@@ -16,8 +16,8 @@ APK using only `aapt2` + `d8`. No Gradle. No Android Studio. No network.
 - Zero network calls — builds fully offline
 - 5 explicit pipeline stages you can read in one shell script
 
-And I didn't ship it untested — every sample APK passed
-**Firebase Test Lab (0 crashes)** before I pushed.
+And I didn't ship it untested — every sample APK was verified with
+`aapt dump badging` + `apksigner verify` before I pushed.
 
 🔗 GitHub: https://github.com/iamcipherdev/gradleless
 📦 MIT licensed. PRs welcome — especially the parts I got wrong.
@@ -47,8 +47,7 @@ What's in it:
 - Auto debug keystore, asset/jar/jniLibs support
 
 I test-before-publish as a rule: every sample APK was verified with
-`aapt dump badging` + `apksigner verify` and passed Firebase Test Lab Robo
-with zero crashes before I pushed.
+`aapt dump badging` + `apksigner verify` before I pushed.
 
 Repo: https://github.com/iamcipherdev/gradleless (MIT)
 
@@ -73,7 +72,7 @@ I built it because Gradle felt like overkill for small apps — full builds of
 the starter template take seconds. The pipeline is 5 explicit stages in one
 readable shell script, so there's no magic.
 
-Every sample APK passed Firebase Test Lab (0 crashes) before I published.
+Every sample APK was verified with `aapt dump badging` + `apksigner verify` before I published.
 MIT licensed: https://github.com/iamcipherdev/gradleless
 
 ---
